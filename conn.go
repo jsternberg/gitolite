@@ -3,6 +3,7 @@ package gitolite
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"os/user"
 	"path/filepath"
@@ -55,7 +56,27 @@ func (s *Server) serve(conn net.Conn) error {
 }
 
 func (c *sshConn) processChannelRequests() {
+	for req := range c.newChannel {
+		if req.ChannelType() != "session" {
+			req.Reject(ssh.UnknownChannelType, "")
+			continue
+		}
+
+		channel, requestCh, err := req.Accept()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		s := &session{channel, requestCh}
+		go s.loop()
+	}
 }
 
 func (c *sshConn) processGlobalRequests() {
+	for req := range c.requests {
+		if req.WantReply {
+			req.Reply(false, nil)
+		}
+	}
 }
