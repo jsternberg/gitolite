@@ -3,5 +3,5 @@ package gitolite
 type Config struct{}
 
 func DefaultConfig() *Config {
-	return nil
+	return &Config{}
 }
