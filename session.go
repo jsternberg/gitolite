@@ -1,6 +1,7 @@
 package gitolite
 
 import (
+	"io"
 	"log"
 
 	"golang.org/x/crypto/ssh"
@@ -22,14 +23,18 @@ func (s *session) loop() {
 				return
 			}
 			req.Reply(true, nil)
+		case "pty-req":
+			// do not allocate a pty since we just want to allow the upcoming shell request
+			// so we can return a version string
+			req.Reply(true, nil)
 		case "shell":
-			req.Reply(false, nil)
+			io.WriteString(s.channel, "Authentication succeeded.\n")
+			req.Reply(true, nil)
 			return
 		default:
 			if req.WantReply {
 				req.Reply(false, nil)
 			}
-			return
 		}
 	}
 }
