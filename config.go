@@ -4,11 +4,17 @@ import "golang.org/x/crypto/ssh"
 
 type Config struct {
 	HostKeys []ssh.Signer
+
+	PublicKeyCallback PublicKeyCallback
+
+	PasswordCallback PasswordCallback
 }
 
 func DefaultConfig() *Config {
 	return &Config{
-		HostKeys: make([]ssh.Signer, 0, 1),
+		HostKeys:          make([]ssh.Signer, 0, 1),
+		PublicKeyCallback: nil,
+		PasswordCallback:  nil,
 	}
 }
 

@@ -15,7 +15,8 @@ type sshConn struct {
 
 func (s *Server) serve(conn net.Conn) error {
 	config := ssh.ServerConfig{
-		PublicKeyCallback: noAuthentication,
+		PublicKeyCallback: s.config.PublicKeyCallback.wrap(),
+		PasswordCallback:  s.config.PasswordCallback.wrap(),
 	}
 
 	for _, hostKey := range s.config.HostKeys {
