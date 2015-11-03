@@ -1,12 +1,8 @@
 package gitolite
 
 import (
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
-	"os/user"
-	"path/filepath"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -22,22 +18,9 @@ func (s *Server) serve(conn net.Conn) error {
 		PublicKeyCallback: noAuthentication,
 	}
 
-	user, err := user.Current()
-	if err != nil {
-		return err
+	for _, hostKey := range s.config.HostKeys {
+		config.AddHostKey(hostKey)
 	}
-	privateKeyPath := filepath.Join(user.HomeDir, ".ssh/id_rsa")
-
-	pemBytes, err := ioutil.ReadFile(privateKeyPath)
-	if err != nil {
-		return fmt.Errorf("unable to load server private key: %s", err)
-	}
-
-	privateKey, err := ssh.ParsePrivateKey(pemBytes)
-	if err != nil {
-		return err
-	}
-	config.AddHostKey(privateKey)
 
 	serverConn, channelRequestCh, globalRequestCh, err := ssh.NewServerConn(conn, &config)
 	if err != nil {
