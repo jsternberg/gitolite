@@ -8,6 +8,7 @@ import (
 )
 
 type sshConn struct {
+	handler    interface{}
 	conn       *ssh.ServerConn
 	newChannel <-chan ssh.NewChannel
 	requests   <-chan *ssh.Request
@@ -30,6 +31,7 @@ func (s *Server) serve(conn net.Conn) error {
 
 	// connection succeeded at this point. create the ssh connection and start the go procs.
 	newConn := sshConn{
+		handler:    s.config.Handler,
 		conn:       serverConn,
 		newChannel: channelRequestCh,
 		requests:   globalRequestCh,
@@ -52,7 +54,11 @@ func (c *sshConn) processChannelRequests() {
 			continue
 		}
 
-		s := &session{channel, requestCh}
+		s := &session{
+			handler:  c.handler,
+			channel:  channel,
+			requests: requestCh,
+		}
 		go s.loop()
 	}
 }
