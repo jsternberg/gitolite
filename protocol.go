@@ -7,14 +7,17 @@ import (
 	"path/filepath"
 )
 
+// Handler invoked for the 'git-upload-pack' command.
 type UploadPack interface {
 	UploadPack(path string, r io.ReadCloser, w io.WriteCloser) error
 }
 
+// Handler invoked for the 'git-receive-pack' command.
 type ReceivePack interface {
 	ReceivePack(path string, r io.ReadCloser, w io.WriteCloser) error
 }
 
+// A directory location to serve git repositories from.
 type Dir string
 
 func (dir Dir) UploadPack(path string, r io.ReadCloser, w io.WriteCloser) error {
